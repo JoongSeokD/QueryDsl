@@ -147,4 +147,23 @@ public class QuerydslBasicTest {
 
     }
 
+    @Test
+    void paging1() throws Exception {
+        //given
+        QueryResults<Member> queryResults = queryFactory
+                .selectFrom(member)
+                .orderBy(member.username.desc())
+                .offset(1)
+                .limit(2)
+                .fetchResults();
+
+        assertEquals(queryResults.getTotal(), 4);
+        assertEquals(queryResults.getLimit(), 2);
+        assertEquals(queryResults.getOffset(), 1);
+        assertEquals(queryResults.getResults().size(), 2);
+        //when
+
+        //then
+    }
+
 }
