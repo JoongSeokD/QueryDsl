@@ -11,12 +11,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static study.querydsl.entity.QMember.member;
 import static study.querydsl.entity.QTeam.*;
 
@@ -305,6 +306,37 @@ public class QuerydslBasicTest {
         }
     }
 
+    @PersistenceUnit
+    EntityManagerFactory emf;
+
+    @Test
+    void fetchJoinNo() throws Exception {
+        em.flush();
+        em.clear();
+
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertFalse(loaded);
+    }
+
+    @Test
+    void fetchJoinUse() throws Exception {
+        em.flush();
+        em.clear();
+
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .join(member.team, team).fetchJoin()
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertTrue(loaded);
+    }
 
 
 }
