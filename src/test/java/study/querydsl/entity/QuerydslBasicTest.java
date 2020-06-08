@@ -3,6 +3,7 @@ package study.querydsl.entity;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import javax.persistence.EntityManager;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static study.querydsl.entity.QMember.member;
@@ -211,8 +213,49 @@ public class QuerydslBasicTest {
 
         assertEquals(teamB.get(team.name), "teamB");
         assertEquals(teamB.get(member.age.avg()), 35);
+    }
 
+    /**
+     * 팀 A에 소속된 모든 회원
+     *
+     */
+    @Test
+    void join() throws Exception {
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .join(member.team, team)
+                .where(team.name.eq("teamA"))
+                .fetch();
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("member1", "member2");
 
     }
+
+    /**
+     * 세타 조인
+     * 회원의 이름이 팀 이름과 같은 회원을 조회
+     */
+    @Test
+    void theta_join() throws Exception {
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+       em.flush();
+       em.clear();
+
+        List<Member> result = queryFactory
+                .select(member)
+                .from(member, team)
+                .where(member.username.eq(team.name))
+                .fetch();
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("teamA", "teamB");
+
+    }
+
 
 }
