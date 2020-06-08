@@ -621,5 +621,36 @@ public class QuerydslBasicTest {
 
     }
 
+    @Test
+    void bulkUpdate() throws Exception {
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        //벌크 연산후 영속성 컨텍스트 초기화 해야함
+
+        assertEquals(count, 2);
+    }
+
+    @Test
+    void bulkAdd() throws Exception {
+        long count = queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+        assertEquals(count, 4);
+    }
+
+    @Test
+    void bulkDelete() throws Exception {
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.lt(18))
+                .execute();
+        assertEquals(count, 1);
+    }
+
 
 }
