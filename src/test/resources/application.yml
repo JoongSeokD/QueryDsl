@@ -4,6 +4,8 @@ spring:
     url: jdbc:h2:mem://localhost/~/querydsl
     username: sa
     password:
+  profiles:
+    active: test
 
   jpa:
     hibernate:
